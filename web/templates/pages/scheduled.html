@@ -1,0 +1,52 @@
+{{define "content"}}
+<div class="mb-8">
+    <h2 class="text-3xl font-bold text-white">Scheduled Jobs</h2>
+    <p class="text-gray-400 mt-1">Jobs scheduled for future execution</p>
+</div>
+
+<div class="bg-dark-800 rounded-xl border border-gray-700/50 overflow-hidden">
+    <table class="w-full">
+        <thead>
+            <tr class="border-b border-gray-700/50">
+                <th class="text-left px-6 py-3 text-xs font-medium text-gray-400 uppercase">ID</th>
+                <th class="text-left px-6 py-3 text-xs font-medium text-gray-400 uppercase">Type</th>
+                <th class="text-left px-6 py-3 text-xs font-medium text-gray-400 uppercase">Priority</th>
+                <th class="text-left px-6 py-3 text-xs font-medium text-gray-400 uppercase">Scheduled At</th>
+                <th class="text-left px-6 py-3 text-xs font-medium text-gray-400 uppercase">Created</th>
+                <th class="text-left px-6 py-3 text-xs font-medium text-gray-400 uppercase">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .jobs}}
+            <tr class="border-b border-gray-700/30 hover:bg-dark-700/50">
+                <td class="px-6 py-4 text-sm font-mono text-teal-400">
+                    <a href="/dashboard/jobs/{{.ID}}" class="hover:underline">{{truncate .ID 8}}</a>
+                </td>
+                <td class="px-6 py-4 text-sm">{{.Type}}</td>
+                <td class="px-6 py-4 text-sm">
+                    <span class="px-2 py-1 text-xs rounded-full {{priorityBadge .Priority}}">{{.Priority.String}}</span>
+                </td>
+                <td class="px-6 py-4 text-sm text-purple-400">{{formatTime .ScheduledAt}}</td>
+                <td class="px-6 py-4 text-sm text-gray-400">{{formatTime .CreatedAt}}</td>
+                <td class="px-6 py-4 text-sm">
+                    <button onclick="cancelJob('{{.ID}}')" class="text-red-400 hover:text-red-300">Cancel</button>
+                </td>
+            </tr>
+            {{else}}
+            <tr>
+                <td colspan="6" class="px-6 py-8 text-center text-gray-500">No scheduled jobs</td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+</div>
+
+<script>
+function cancelJob(id) {
+    if (!confirm('Cancel this scheduled job?')) return;
+    fetch('/api/v1/jobs/' + id, { method: 'DELETE' })
+        .then(r => r.json())
+        .then(() => location.reload());
+}
+</script>
+{{end}}

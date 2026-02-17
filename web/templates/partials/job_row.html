@@ -1,0 +1,19 @@
+{{define "job_row.html"}}
+{{range .jobs}}
+<tr class="border-b border-gray-700/30 hover:bg-dark-700/50 cursor-pointer" onclick="window.location='/dashboard/jobs/{{.ID}}'">
+    <td class="px-6 py-4 text-sm font-mono text-teal-400">{{truncate .ID 8}}</td>
+    <td class="px-6 py-4 text-sm">{{.Type}}</td>
+    <td class="px-6 py-4 text-sm">
+        <span class="px-2 py-1 text-xs rounded-full {{priorityBadge .Priority}}">{{.Priority.String}}</span>
+    </td>
+    <td class="px-6 py-4 text-sm">
+        <span class="px-2 py-1 text-xs rounded-full {{statusBadge (printf "%s" .Status)}}">{{upper (printf "%s" .Status)}}</span>
+    </td>
+    <td class="px-6 py-4 text-sm text-gray-400">{{formatTime .CreatedAt}}</td>
+</tr>
+{{else}}
+<tr>
+    <td colspan="5" class="px-6 py-8 text-center text-gray-500">No jobs yet</td>
+</tr>
+{{end}}
+{{end}}

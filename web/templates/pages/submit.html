@@ -1,0 +1,271 @@
+{{define "content"}}
+<div class="mb-8">
+    <h2 class="text-3xl font-bold text-white">Submit Job</h2>
+    <p class="text-gray-400 mt-1">Create a new task to be processed by the queue</p>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Submit Form -->
+    <div class="lg:col-span-2">
+        <div class="bg-dark-800 rounded-xl border border-gray-700/50 p-6">
+            <form id="submit-form" onsubmit="submitJob(event)">
+                <!-- Task Type -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Task Type</label>
+                    <select id="job-type" class="w-full bg-dark-700 border border-gray-600 text-gray-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent" onchange="fillExample()">
+                        <option value="">Select a task type...</option>
+                        {{range .taskTypes}}
+                        <option value="{{.}}">{{.}}</option>
+                        {{end}}
+                        <option value="__custom__">Custom type...</option>
+                    </select>
+                    <input type="text" id="job-type-custom" placeholder="e.g., notification:push" class="hidden w-full mt-2 bg-dark-700 border border-gray-600 text-gray-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent">
+                </div>
+
+                <!-- Priority -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Priority</label>
+                    <div class="grid grid-cols-4 gap-2">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="priority" value="critical" class="peer hidden">
+                            <div class="px-4 py-2 text-center rounded-lg border border-gray-600 text-sm text-gray-400 peer-checked:border-red-500 peer-checked:bg-red-500/10 peer-checked:text-red-400 transition">Critical</div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="priority" value="high" class="peer hidden">
+                            <div class="px-4 py-2 text-center rounded-lg border border-gray-600 text-sm text-gray-400 peer-checked:border-orange-500 peer-checked:bg-orange-500/10 peer-checked:text-orange-400 transition">High</div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="priority" value="default" class="peer hidden" checked>
+                            <div class="px-4 py-2 text-center rounded-lg border border-gray-600 text-sm text-gray-400 peer-checked:border-teal-500 peer-checked:bg-teal-500/10 peer-checked:text-teal-400 transition">Default</div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="priority" value="low" class="peer hidden">
+                            <div class="px-4 py-2 text-center rounded-lg border border-gray-600 text-sm text-gray-400 peer-checked:border-gray-500 peer-checked:bg-gray-500/10 peer-checked:text-gray-300 transition">Low</div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Payload -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Payload (JSON)</label>
+                    <textarea id="job-payload" rows="6" class="w-full bg-dark-700 border border-gray-600 text-gray-200 rounded-lg px-4 py-3 text-sm font-mono focus:ring-2 focus:ring-teal-500 focus:border-transparent" placeholder='{"key": "value"}'>{}</textarea>
+                    <p id="json-error" class="text-red-400 text-xs mt-1 hidden">Invalid JSON</p>
+                </div>
+
+                <!-- Advanced Options -->
+                <details class="mb-6">
+                    <summary class="text-sm text-gray-400 cursor-pointer hover:text-gray-200 mb-3">Advanced Options</summary>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3 pl-1">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1">Max Retries</label>
+                            <input type="number" id="max-retries" value="3" min="0" max="20" class="w-full bg-dark-700 border border-gray-600 text-gray-200 rounded-lg px-3 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1">Timeout</label>
+                            <input type="text" id="timeout" value="30s" placeholder="e.g., 30s, 5m" class="w-full bg-dark-700 border border-gray-600 text-gray-200 rounded-lg px-3 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1">Delay</label>
+                            <input type="text" id="delay" placeholder="e.g., 10s, 5m, 1h" class="w-full bg-dark-700 border border-gray-600 text-gray-200 rounded-lg px-3 py-2 text-sm">
+                        </div>
+                    </div>
+                </details>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submit-btn" class="w-full bg-teal-500 hover:bg-teal-600 text-white font-medium py-3 px-6 rounded-lg transition flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                    Submit Job
+                </button>
+            </form>
+
+            <!-- Result -->
+            <div id="result" class="hidden mt-6 p-4 rounded-lg border"></div>
+        </div>
+    </div>
+
+    <!-- Quick Examples Sidebar -->
+    <div>
+        <div class="bg-dark-800 rounded-xl border border-gray-700/50 p-6">
+            <h3 class="text-lg font-semibold text-white mb-4">Quick Examples</h3>
+            <div class="space-y-3">
+                <button onclick="loadExample('email')" class="w-full text-left px-4 py-3 rounded-lg bg-dark-700 hover:bg-dark-900 border border-gray-700/50 transition">
+                    <div class="text-sm font-medium text-teal-400">Send Email</div>
+                    <div class="text-xs text-gray-500 mt-1">email:send &middot; high priority</div>
+                </button>
+                <button onclick="loadExample('image')" class="w-full text-left px-4 py-3 rounded-lg bg-dark-700 hover:bg-dark-900 border border-gray-700/50 transition">
+                    <div class="text-sm font-medium text-teal-400">Resize Image</div>
+                    <div class="text-xs text-gray-500 mt-1">image:resize &middot; default priority</div>
+                </button>
+                <button onclick="loadExample('webhook')" class="w-full text-left px-4 py-3 rounded-lg bg-dark-700 hover:bg-dark-900 border border-gray-700/50 transition">
+                    <div class="text-sm font-medium text-teal-400">Deliver Webhook</div>
+                    <div class="text-xs text-gray-500 mt-1">webhook:deliver &middot; critical priority</div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Recent Submissions -->
+        <div id="recent-submissions" class="bg-dark-800 rounded-xl border border-gray-700/50 p-6 mt-6">
+            <h3 class="text-lg font-semibold text-white mb-4">Recent Submissions</h3>
+            <div id="recent-list" class="space-y-2">
+                <p class="text-sm text-gray-500">No jobs submitted yet in this session</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const examples = {
+    email: {
+        type: 'email:send',
+        priority: 'high',
+        payload: JSON.stringify({ to: 'user@example.com', subject: 'Welcome!', body: 'Hello from GoQueue' }, null, 2)
+    },
+    image: {
+        type: 'image:resize',
+        priority: 'default',
+        payload: JSON.stringify({ url: 'https://example.com/photo.jpg', width: 800, height: 600 }, null, 2)
+    },
+    webhook: {
+        type: 'webhook:deliver',
+        priority: 'critical',
+        payload: JSON.stringify({ url: 'https://example.com/webhook', method: 'POST', headers: { 'X-Event': 'order.created' }, body: { order_id: '12345' } }, null, 2)
+    }
+};
+
+function loadExample(name) {
+    const ex = examples[name];
+    document.getElementById('job-type').value = ex.type;
+    document.getElementById('job-type-custom').classList.add('hidden');
+    document.querySelector(`input[name="priority"][value="${ex.priority}"]`).checked = true;
+    document.getElementById('job-payload').value = ex.payload;
+}
+
+function fillExample() {
+    const sel = document.getElementById('job-type');
+    const customInput = document.getElementById('job-type-custom');
+    if (sel.value === '__custom__') {
+        customInput.classList.remove('hidden');
+        customInput.focus();
+    } else {
+        customInput.classList.add('hidden');
+    }
+
+    // Auto-fill payload for known types
+    const typeMap = { 'email:send': 'email', 'image:resize': 'image', 'webhook:deliver': 'webhook' };
+    if (typeMap[sel.value]) {
+        document.getElementById('job-payload').value = examples[typeMap[sel.value]].payload;
+    }
+}
+
+function submitJob(e) {
+    e.preventDefault();
+
+    const typeSelect = document.getElementById('job-type');
+    let jobType = typeSelect.value;
+    if (jobType === '__custom__') {
+        jobType = document.getElementById('job-type-custom').value.trim();
+    }
+
+    if (!jobType) {
+        showResult('error', 'Please select or enter a task type');
+        return;
+    }
+
+    const payloadStr = document.getElementById('job-payload').value.trim();
+    let payload;
+    try {
+        payload = JSON.parse(payloadStr);
+        document.getElementById('json-error').classList.add('hidden');
+    } catch (err) {
+        document.getElementById('json-error').classList.remove('hidden');
+        return;
+    }
+
+    const priority = document.querySelector('input[name="priority"]:checked').value;
+    const maxRetries = parseInt(document.getElementById('max-retries').value) || 3;
+    const timeout = document.getElementById('timeout').value.trim() || '30s';
+    const delay = document.getElementById('delay').value.trim();
+
+    const body = {
+        type: jobType,
+        payload: payload,
+        priority: priority,
+        max_retries: maxRetries,
+        timeout: timeout
+    };
+    if (delay) body.delay = delay;
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Submitting...';
+
+    fetch('/api/v1/jobs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.error) {
+            showResult('error', data.error);
+        } else {
+            showResult('success', data);
+            addToRecent(data);
+        }
+    })
+    .catch(err => {
+        showResult('error', 'Network error: ' + err.message);
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg> Submit Job';
+    });
+}
+
+function showResult(type, data) {
+    const el = document.getElementById('result');
+    el.classList.remove('hidden', 'border-green-500/30', 'bg-green-500/5', 'border-red-500/30', 'bg-red-500/5');
+
+    if (type === 'success') {
+        el.className = 'mt-6 p-4 rounded-lg border border-green-500/30 bg-green-500/5';
+        el.innerHTML = `
+            <div class="flex items-center gap-2 mb-2">
+                <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <span class="text-green-400 font-medium">Job Submitted Successfully</span>
+            </div>
+            <div class="text-sm text-gray-300 space-y-1">
+                <div><span class="text-gray-500">ID:</span> <a href="/dashboard/jobs/${data.id}" class="font-mono text-teal-400 hover:underline">${data.id}</a></div>
+                <div><span class="text-gray-500">Type:</span> ${data.type}</div>
+                <div><span class="text-gray-500">Status:</span> ${data.status}</div>
+                <div><span class="text-gray-500">Priority:</span> ${data.priority}</div>
+            </div>
+        `;
+    } else {
+        el.className = 'mt-6 p-4 rounded-lg border border-red-500/30 bg-red-500/5';
+        el.innerHTML = `
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                <span class="text-red-400 font-medium">Error: ${typeof data === 'string' ? data : data.error || JSON.stringify(data)}</span>
+            </div>
+        `;
+    }
+}
+
+function addToRecent(data) {
+    const list = document.getElementById('recent-list');
+    if (list.querySelector('p')) list.innerHTML = '';
+
+    const item = document.createElement('a');
+    item.href = '/dashboard/jobs/' + data.id;
+    item.className = 'block px-3 py-2 rounded-lg bg-dark-700 hover:bg-dark-900 border border-gray-700/50 transition';
+    item.innerHTML = `
+        <div class="flex items-center justify-between">
+            <span class="text-xs font-mono text-teal-400">${data.id.substring(0, 8)}...</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-${data.priority === 'critical' ? 'red' : data.priority === 'high' ? 'orange' : 'teal'}-500/10 text-${data.priority === 'critical' ? 'red' : data.priority === 'high' ? 'orange' : 'teal'}-400">${data.priority}</span>
+        </div>
+        <div class="text-xs text-gray-500 mt-1">${data.type}</div>
+    `;
+    list.prepend(item);
+}
+</script>
+{{end}}

@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: goqueue
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: "8080"
+      - key: ENVIRONMENT
+        value: production
+      - key: API_KEY
+        generateValue: true
+      - key: REDIS_URL
+        fromService:
+          name: goqueue-redis
+          type: redis
+          property: connectionString
+      - key: WORKER_CONCURRENCY
+        value: "5"
+      - key: DASHBOARD_ENABLED
+        value: "true"
+      - key: DASHBOARD_USERNAME
+        value: admin
+      - key: DASHBOARD_PASSWORD
+        generateValue: true
+
+  - type: redis
+    name: goqueue-redis
+    plan: free
+    maxmemoryPolicy: allkeys-lru
+    ipAllowList: []

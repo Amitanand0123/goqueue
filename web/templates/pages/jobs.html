@@ -1,0 +1,82 @@
+{{define "content"}}
+<div class="mb-8 flex items-center justify-between">
+    <div>
+        <h2 class="text-3xl font-bold text-white">Jobs</h2>
+        <p class="text-gray-400 mt-1">{{.total}} total jobs</p>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="bg-dark-800 rounded-xl border border-gray-700/50 p-4 mb-6">
+    <form method="GET" action="/dashboard/jobs" class="flex gap-4 items-center">
+        <select name="status" class="bg-dark-700 border border-gray-600 text-gray-200 rounded-lg px-3 py-2 text-sm">
+            <option value="">All Statuses</option>
+            <option value="pending" {{if eq .status "pending"}}selected{{end}}>Pending</option>
+            <option value="scheduled" {{if eq .status "scheduled"}}selected{{end}}>Scheduled</option>
+            <option value="running" {{if eq .status "running"}}selected{{end}}>Running</option>
+            <option value="completed" {{if eq .status "completed"}}selected{{end}}>Completed</option>
+            <option value="retrying" {{if eq .status "retrying"}}selected{{end}}>Retrying</option>
+            <option value="failed" {{if eq .status "failed"}}selected{{end}}>Failed</option>
+            <option value="cancelled" {{if eq .status "cancelled"}}selected{{end}}>Cancelled</option>
+        </select>
+        <input type="text" name="type" value="{{.type}}" placeholder="Filter by type..." class="bg-dark-700 border border-gray-600 text-gray-200 rounded-lg px-3 py-2 text-sm w-48">
+        <button type="submit" class="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">Filter</button>
+        <a href="/dashboard/jobs" class="text-gray-400 hover:text-gray-200 text-sm">Clear</a>
+    </form>
+</div>
+
+<!-- Jobs Table -->
+<div class="bg-dark-800 rounded-xl border border-gray-700/50 overflow-hidden">
+    <table class="w-full">
+        <thead>
+            <tr class="border-b border-gray-700/50">
+                <th class="text-left px-6 py-3 text-xs font-medium text-gray-400 uppercase">ID</th>
+                <th class="text-left px-6 py-3 text-xs font-medium text-gray-400 uppercase">Type</th>
+                <th class="text-left px-6 py-3 text-xs font-medium text-gray-400 uppercase">Priority</th>
+                <th class="text-left px-6 py-3 text-xs font-medium text-gray-400 uppercase">Status</th>
+                <th class="text-left px-6 py-3 text-xs font-medium text-gray-400 uppercase">Retries</th>
+                <th class="text-left px-6 py-3 text-xs font-medium text-gray-400 uppercase">Created</th>
+                <th class="text-left px-6 py-3 text-xs font-medium text-gray-400 uppercase">Duration</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .jobs}}
+            <tr class="border-b border-gray-700/30 hover:bg-dark-700/50 cursor-pointer" onclick="window.location='/dashboard/jobs/{{.ID}}'">
+                <td class="px-6 py-4 text-sm font-mono text-teal-400">{{truncate .ID 8}}</td>
+                <td class="px-6 py-4 text-sm">{{.Type}}</td>
+                <td class="px-6 py-4 text-sm">
+                    <span class="px-2 py-1 text-xs rounded-full {{priorityBadge .Priority}}">{{.Priority.String}}</span>
+                </td>
+                <td class="px-6 py-4 text-sm">
+                    <span class="px-2 py-1 text-xs rounded-full {{statusBadge (printf "%s" .Status)}}">{{upper (printf "%s" .Status)}}</span>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-400">{{.RetryCount}}/{{.MaxRetries}}</td>
+                <td class="px-6 py-4 text-sm text-gray-400">{{formatTime .CreatedAt}}</td>
+                <td class="px-6 py-4 text-sm text-gray-400">{{formatDuration .CompletedAt .StartedAt}}</td>
+            </tr>
+            {{else}}
+            <tr>
+                <td colspan="7" class="px-6 py-8 text-center text-gray-500">No jobs found</td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+{{if gt .total .limit}}
+<div class="flex items-center justify-between mt-6">
+    <div class="text-sm text-gray-400">
+        Showing page {{.page}} of {{totalPages .total .limit}}
+    </div>
+    <div class="flex gap-2">
+        {{if gt .page 1}}
+        <a href="/dashboard/jobs?page={{sub .page 1}}&status={{.status}}&type={{.type}}" class="px-3 py-2 bg-dark-800 border border-gray-700 rounded-lg text-sm hover:bg-dark-700">Previous</a>
+        {{end}}
+        {{if lt .page (totalPages .total .limit)}}
+        <a href="/dashboard/jobs?page={{add .page 1}}&status={{.status}}&type={{.type}}" class="px-3 py-2 bg-dark-800 border border-gray-700 rounded-lg text-sm hover:bg-dark-700">Next</a>
+        {{end}}
+    </div>
+</div>
+{{end}}
+{{end}}

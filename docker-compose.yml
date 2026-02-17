@@ -1,0 +1,27 @@
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+  goqueue:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - ENVIRONMENT=development
+      - REDIS_URL=redis:6379
+      - WORKER_CONCURRENCY=10
+      - DASHBOARD_ENABLED=true
+      - DASHBOARD_USERNAME=admin
+      - DASHBOARD_PASSWORD=admin
+    depends_on:
+      - redis
+    command: ["start"]
+
+volumes:
+  redis_data:

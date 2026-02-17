@@ -1,0 +1,32 @@
+{{define "stats_cards.html"}}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="bg-dark-800 rounded-xl border border-gray-700/50 p-6">
+        <div class="text-gray-400 text-sm mb-1">Total Processed</div>
+        <div class="text-3xl font-bold text-teal-400">{{if .stats}}{{index .stats "total_processed"}}{{else}}0{{end}}</div>
+        <div class="text-gray-500 text-xs mt-2">
+            Today: {{if .stats}}{{if index .stats "jobs_today"}}{{index (index .stats "jobs_today") "processed"}}{{else}}0{{end}}{{else}}0{{end}}
+        </div>
+    </div>
+    <div class="bg-dark-800 rounded-xl border border-gray-700/50 p-6">
+        <div class="text-gray-400 text-sm mb-1">Total Failed</div>
+        <div class="text-3xl font-bold text-red-400">{{if .stats}}{{index .stats "total_failed"}}{{else}}0{{end}}</div>
+        <div class="text-gray-500 text-xs mt-2">
+            Today: {{if .stats}}{{if index .stats "jobs_today"}}{{index (index .stats "jobs_today") "failed"}}{{else}}0{{end}}{{else}}0{{end}}
+        </div>
+    </div>
+    <div class="bg-dark-800 rounded-xl border border-gray-700/50 p-6">
+        <div class="text-gray-400 text-sm mb-1">Dead Jobs</div>
+        <div class="text-3xl font-bold text-orange-400">{{if .stats}}{{index .stats "dead_count"}}{{else}}0{{end}}</div>
+        <div class="text-gray-500 text-xs mt-2">
+            <a href="/dashboard/dead" class="text-teal-400 hover:underline">View DLQ &rarr;</a>
+        </div>
+    </div>
+    <div class="bg-dark-800 rounded-xl border border-gray-700/50 p-6">
+        <div class="text-gray-400 text-sm mb-1">Active Workers</div>
+        <div class="text-3xl font-bold text-blue-400">{{if .stats}}{{index .stats "active_workers"}}{{else}}0{{end}}</div>
+        <div class="text-gray-500 text-xs mt-2">
+            <a href="/dashboard/workers" class="text-teal-400 hover:underline">View Workers &rarr;</a>
+        </div>
+    </div>
+</div>
+{{end}}

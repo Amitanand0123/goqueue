@@ -1,0 +1,76 @@
+{{define "base.html"}}
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.title}} — GoQueue</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: { 800: '#1a1a2e', 900: '#0f0f23', 700: '#252547' },
+                        teal: { 400: '#2dd4bf', 500: '#14b8a6', 600: '#0d9488' }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body class="bg-dark-900 text-gray-200 min-h-screen flex">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-dark-800 border-r border-gray-700/50 min-h-screen fixed">
+        <div class="p-6">
+            <h1 class="text-2xl font-bold text-teal-400">GoQueue</h1>
+            <p class="text-gray-500 text-sm mt-1">Task Queue Dashboard</p>
+        </div>
+        <nav class="mt-4">
+            <a href="/dashboard" class="flex items-center px-6 py-3 text-sm {{if eq .active "dashboard"}}bg-teal-500/10 text-teal-400 border-r-2 border-teal-400{{else}}text-gray-400 hover:bg-dark-700 hover:text-gray-200{{end}}">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                Overview
+            </a>
+            <a href="/dashboard/submit" class="flex items-center px-6 py-3 text-sm {{if eq .active "submit"}}bg-teal-500/10 text-teal-400 border-r-2 border-teal-400{{else}}text-gray-400 hover:bg-dark-700 hover:text-gray-200{{end}}">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Submit Job
+            </a>
+            <a href="/dashboard/queues" class="flex items-center px-6 py-3 text-sm {{if eq .active "queues"}}bg-teal-500/10 text-teal-400 border-r-2 border-teal-400{{else}}text-gray-400 hover:bg-dark-700 hover:text-gray-200{{end}}">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                Queues
+            </a>
+            <a href="/dashboard/jobs" class="flex items-center px-6 py-3 text-sm {{if eq .active "jobs"}}bg-teal-500/10 text-teal-400 border-r-2 border-teal-400{{else}}text-gray-400 hover:bg-dark-700 hover:text-gray-200{{end}}">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                Jobs
+            </a>
+            <a href="/dashboard/scheduled" class="flex items-center px-6 py-3 text-sm {{if eq .active "scheduled"}}bg-teal-500/10 text-teal-400 border-r-2 border-teal-400{{else}}text-gray-400 hover:bg-dark-700 hover:text-gray-200{{end}}">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Scheduled
+            </a>
+            <a href="/dashboard/dead" class="flex items-center px-6 py-3 text-sm {{if eq .active "dead"}}bg-teal-500/10 text-teal-400 border-r-2 border-teal-400{{else}}text-gray-400 hover:bg-dark-700 hover:text-gray-200{{end}}">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>
+                Dead Letter Queue
+            </a>
+            <a href="/dashboard/workers" class="flex items-center px-6 py-3 text-sm {{if eq .active "workers"}}bg-teal-500/10 text-teal-400 border-r-2 border-teal-400{{else}}text-gray-400 hover:bg-dark-700 hover:text-gray-200{{end}}">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                Workers
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="ml-64 flex-1 p-8">
+        {{template "content" .}}
+    </main>
+
+    <!-- Toast container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
+{{end}}

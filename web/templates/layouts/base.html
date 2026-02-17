@@ -5,22 +5,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{.title}} — GoQueue</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        dark: { 800: '#1a1a2e', 900: '#0f0f23', 700: '#252547' },
+                        dark: { 700: '#252547', 800: '#1a1a2e', 900: '#0f0f23' },
                         teal: { 400: '#2dd4bf', 500: '#14b8a6', 600: '#0d9488' }
                     }
                 }
             }
         }
     </script>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="/static/css/app.css">
 </head>
 <body class="bg-dark-900 text-gray-200 min-h-screen flex">

@@ -53,8 +53,8 @@ func Load() *Config {
 		DefaultRetryDelay: getEnvDuration("JOB_DEFAULT_RETRY_DELAY", 10*time.Second),
 
 		DashboardEnabled:  getEnvBool("DASHBOARD_ENABLED", true),
-		DashboardUsername: getEnv("DASHBOARD_USERNAME", "admin"),
-		DashboardPassword: getEnv("DASHBOARD_PASSWORD", "admin"),
+		DashboardUsername: getEnv("DASHBOARD_USERNAME", ""),
+		DashboardPassword: getEnv("DASHBOARD_PASSWORD", ""),
 
 		MetricsRetentionDays: getEnvInt("METRICS_RETENTION_DAYS", 30),
 	}

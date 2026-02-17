@@ -1,3 +1,11 @@
+/* Custom dark theme colors — fallback if Tailwind CDN is slow */
+.bg-dark-700 { background-color: #252547; }
+.bg-dark-800 { background-color: #1a1a2e; }
+.bg-dark-900 { background-color: #0f0f23; }
+.text-teal-400 { color: #2dd4bf; }
+.bg-teal-500 { background-color: #14b8a6; }
+.hover\:bg-teal-600:hover { background-color: #0d9488; }
+
 @keyframes slide-in {
     from {
         transform: translateX(100%);

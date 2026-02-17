@@ -162,6 +162,7 @@ func Setup(ctx context.Context, engine *core.Engine, cfg *config.Config, logger 
 
 		dash.GET("", dashHandler.Overview)
 		dash.GET("/submit", dashHandler.Submit)
+		dash.POST("/submit", dashHandler.SubmitJob)
 		dash.GET("/queues", dashHandler.Queues)
 		dash.GET("/jobs", dashHandler.Jobs)
 		dash.GET("/jobs/:id", dashHandler.JobDetail)

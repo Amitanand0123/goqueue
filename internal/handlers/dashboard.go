@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/Amitanand0123/goqueue/internal/core"
 	"github.com/gin-gonic/gin"
@@ -221,6 +223,53 @@ func (h *DashboardHandler) Submit(c *gin.Context) {
 		"title":     "Submit Job",
 		"active":    "submit",
 		"taskTypes": taskTypes,
+	})
+}
+
+// SubmitJob handles POST /dashboard/submit — creates a job without API key auth.
+func (h *DashboardHandler) SubmitJob(c *gin.Context) {
+	var req struct {
+		Type       string          `json:"type" binding:"required"`
+		Payload    json.RawMessage `json:"payload" binding:"required"`
+		Priority   string          `json:"priority"`
+		MaxRetries *int            `json:"max_retries"`
+		Timeout    string          `json:"timeout"`
+		Delay      string          `json:"delay"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	opts := []core.JobOption{}
+	if req.Priority != "" {
+		opts = append(opts, core.WithPriority(core.ParsePriority(req.Priority)))
+	}
+	if req.MaxRetries != nil {
+		opts = append(opts, core.WithMaxRetries(*req.MaxRetries))
+	}
+	if req.Timeout != "" {
+		if d, err := time.ParseDuration(req.Timeout); err == nil {
+			opts = append(opts, core.WithTimeout(d))
+		}
+	}
+	if req.Delay != "" {
+		if d, err := time.ParseDuration(req.Delay); err == nil {
+			opts = append(opts, core.WithDelay(d))
+		}
+	}
+
+	job := core.NewJob(req.Type, req.Payload, opts...)
+	if err := h.engine.Scheduler.Enqueue(c.Request.Context(), job); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"id":       job.ID,
+		"type":     job.Type,
+		"status":   string(job.Status),
+		"priority": job.Priority.String(),
 	})
 }
 

@@ -12,10 +12,7 @@ services:
       - key: API_KEY
         generateValue: true
       - key: REDIS_URL
-        fromService:
-          name: goqueue-redis
-          type: redis
-          property: connectionString
+        sync: false # Set manually in Render dashboard (Upstash rediss:// URL)
       - key: WORKER_CONCURRENCY
         value: "5"
       - key: DASHBOARD_ENABLED
@@ -24,9 +21,3 @@ services:
         value: admin
       - key: DASHBOARD_PASSWORD
         generateValue: true
-
-  - type: redis
-    name: goqueue-redis
-    plan: free
-    maxmemoryPolicy: allkeys-lru
-    ipAllowList: []
